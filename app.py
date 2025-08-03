@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import JSONResponse
 import shutil
 import os
 from MixedModelDOE_Mean_and_Var_as_Function_to_Github_20250802 import run_mixed_model_doe
@@ -6,7 +7,14 @@ from MixedModelDOE_Mean_and_Var_as_Function_to_Github_20250802 import run_mixed_
 app = FastAPI()
 
 @app.post("/runDOE")
-async def run_doe(file: UploadFile = File(...)):
+async def run_doe(file: UploadFile = File(None)):
+    # 处理未上传文件或空文件名的情况，返回标准 JSON 错误
+    if file is None or not hasattr(file, "filename") or not file.filename:
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": "No file uploaded"}
+        )
+
     # 使用 os.path.basename 清理上传文件名，防止路径穿越攻击
     safe_filename = os.path.basename(file.filename)
 
@@ -20,11 +28,23 @@ async def run_doe(file: UploadFile = File(...)):
     input_path = os.path.join(input_dir, safe_filename)
 
     # 保存上传的文件
-    with open(input_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        with open(input_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"File save failed: {str(e)}"}
+        )
 
     # 调用 DOE 函数
-    run_mixed_model_doe(file_path=input_path, output_dir=output_dir)
+    try:
+        run_mixed_model_doe(file_path=input_path, output_dir=output_dir)
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"DOE analysis failed: {str(e)}"}
+        )
 
     # 返回结果
     return {
