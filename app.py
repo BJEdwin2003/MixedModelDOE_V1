@@ -53,3 +53,7 @@ async def run_doe(file: UploadFile = File(None)):
         "output_dir": output_dir,
         "files": os.listdir(output_dir)
     }
+
+@app.get("/runDOE")
+async def run_doe_get():
+    return {"status": "ready"}
