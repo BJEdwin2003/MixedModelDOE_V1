@@ -1,0 +1,203 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mixed Model DOE Analysis API",
+    "description": "API for performing Design of Experiments (DOE) analysis using Mixed Models. Analyzes L*a*b color space data with statistical modeling.",
+    "version": "1.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-render-service.onrender.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/runDOE": {
+      "post": {
+        "summary": "Run DOE Analysis",
+        "description": "Upload a CSV file and perform Mixed Model DOE analysis. Returns comprehensive statistical results including model parameters, diagnostics, and variance components.",
+        "operationId": "run_doe_analysis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "CSV file containing DOE data with columns: dye1, dye2, Time, Temp, Lvalue, Avalue, Bvalue"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "input_file": {
+                      "type": "string",
+                      "description": "Path to the uploaded file"
+                    },
+                    "output_dir": {
+                      "type": "string",
+                      "description": "Directory containing analysis results"
+                    },
+                    "files": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of generated output files",
+                      "example": [
+                        "fullmodel_logworth.csv",
+                        "simplified_logworth.csv",
+                        "coded_parameters.csv",
+                        "uncoded_parameters.csv",
+                        "diagnostics_summary.csv",
+                        "JMP_style_lof.csv",
+                        "scaler.csv",
+                        "model_formulas.txt",
+                        "residual_data_Lvalue_from_MixedModel.csv",
+                        "residual_data_Avalue_from_MixedModel.csv",
+                        "residual_data_Bvalue_from_MixedModel.csv",
+                        "design_data.csv",
+                        "mixed_model_variance_summary.csv",
+                        "InputDataBrief.csv",
+                        "fixed_intercepts.csv"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - no file uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "No file uploaded"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "DOE analysis failed: [error details]"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["DOE Analysis"]
+      },
+      "get": {
+        "summary": "Check API Status",
+        "description": "Simple health check endpoint to verify the API is running",
+        "operationId": "check_api_status",
+        "responses": {
+          "200": {
+            "description": "API is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ready"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Health Check"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "input_file": {
+            "type": "string"
+          },
+          "output_dir": {
+            "type": "string"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "DOE Analysis",
+      "description": "Design of Experiments statistical analysis operations"
+    },
+    {
+      "name": "Health Check",
+      "description": "API health and status endpoints"
+    }
+  ]
+}

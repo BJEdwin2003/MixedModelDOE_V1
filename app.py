@@ -4,7 +4,11 @@ import shutil
 import os
 from MixedModelDOE_Function_FollowOriginal_20250804 import run_mixed_model_doe
 
-app = FastAPI()
+app = FastAPI(
+    title="Mixed Model DOE Analysis API",
+    description="API for performing Design of Experiments (DOE) analysis using Mixed Models. Analyzes L*a*b color space data with statistical modeling.",
+    version="1.1.0"
+)
 
 @app.post("/runDOE")
 async def run_doe(file: UploadFile = File(None)):
