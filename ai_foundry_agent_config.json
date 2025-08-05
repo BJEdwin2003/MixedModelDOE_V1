@@ -1,0 +1,52 @@
+{
+  "agent_name": "MixedModelDOE_Agent",
+  "description": "Specialized agent for Mixed Model DOE analysis using strict core Python implementation",
+  "version": "1.0.0",
+  
+  "environment_variables": {
+    "DOE_CSV_PATH": "C:\\Zhanglei_Microsoft_Upgrade_by_20240905\\Pytyon_Study_Local\\Color_S2\\DOEData_20250622.csv",
+    "DOE_API_ENDPOINT": "https://mixedmodeldoe-v1.onrender.com/api/DoeAnalysis",
+    "DOE_RESPONSE_VARS": ["Lvalue", "Avalue", "Bvalue"],
+    "DOE_PREDICTORS": ["dye1", "dye2", "Time", "Temp"],
+    "DOE_THRESHOLD": 1.3,
+    "DOE_MIN_SIGNIFICANT": 2
+  },
+  
+  "action_definition": {
+    "name": "run_mixed_model_doe",
+    "description": "Execute Mixed Model DOE analysis using core Python implementation with strict methodology",
+    "type": "http_request",
+    "method": "POST",
+    "url": "https://mixedmodeldoe-v1.onrender.com/api/DoeAnalysis",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body_template": {
+      "data": "{base64_csv_data}",
+      "response_vars": "{DOE_RESPONSE_VARS}",
+      "predictors": "{DOE_PREDICTORS}",
+      "threshold": "{DOE_THRESHOLD}",
+      "min_significant": "{DOE_MIN_SIGNIFICANT}"
+    }
+  },
+  
+  "triggers": [
+    "run mixed model doe",
+    "execute doe analysis",
+    "analyze doe data",
+    "run doe with mixed model",
+    "请运行混合模型DOE分析",
+    "执行DOE分析"
+  ],
+  
+  "response_format": {
+    "success_template": "✅ Mixed Model DOE analysis completed successfully!\n\n📊 Analysis Summary:\n- Response Variables: {response_variables}\n- Threshold: {threshold}\n- Analysis Status: {analysis_completed}\n- Generated Files: {file_count} files\n\n🔗 Full results available via API endpoint.",
+    "error_template": "❌ Mixed Model DOE analysis failed: {error_message}\n\nPlease check:\n1. CSV file path and format\n2. API endpoint availability\n3. Parameter specifications"
+  },
+  
+  "validation_rules": {
+    "required_csv_columns": ["dye1", "dye2", "Time", "Temp", "Lvalue", "Avalue", "Bvalue"],
+    "api_timeout": 120,
+    "max_retries": 3
+  }
+}
