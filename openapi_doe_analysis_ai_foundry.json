@@ -1,0 +1,228 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mixed Model DOE Analysis API (AI Foundry Compatible)",
+    "description": "API for performing Design of Experiments (DOE) analysis using Mixed Models. Optimized for AI Foundry integration with flexible parameter formatting.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://mixedmodeldoe-v1.onrender.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/DoeAnalysis": {
+      "post": {
+        "summary": "DOE Analysis (AI Foundry Compatible)",
+        "description": "Perform Mixed Model DOE analysis with flexible data input and configurable response variables. Designed for seamless AI Foundry integration.",
+        "operationId": "doe_analysis_ai_foundry",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "CSV data input. Supports: 1) Base64 encoded CSV data, 2) Raw CSV data as string, 3) URL to CSV file (future support)"
+                  },
+                  "response_column": {
+                    "type": "string",
+                    "description": "Response variable(s) to analyze. Supports: - Single response: \"Lvalue\" - Multiple responses: \"Lvalue,Avalue,Bvalue\" (comma-separated string). ⚠️ **Important for AI Foundry**: Must be a comma-separated STRING, not an array!",
+                    "examples": [
+                      "Lvalue",
+                      "Lvalue,Avalue,Bvalue",
+                      "Yield,Purity,Strength"
+                    ]
+                  },
+                  "predictors": {
+                    "type": "string",
+                    "description": "Predictor variables (optional). Comma-separated string like \"dye1,dye2,Time,Temp\". If not provided, will auto-detect from data.",
+                    "examples": [
+                      "dye1,dye2,Time,Temp",
+                      "Factor1,Factor2,Factor3"
+                    ]
+                  },
+                  "threshold": {
+                    "type": "number",
+                    "description": "LogWorth threshold for factor significance",
+                    "default": 1.5,
+                    "examples": [1.3, 1.5, 2.0]
+                  },
+                  "force_full_dataset": {
+                    "type": "boolean",
+                    "description": "Use complete dataset for analysis (true) or allow sampling for large datasets (false)",
+                    "default": true
+                  }
+                },
+                "required": ["data", "response_column"],
+                "examples": [
+                  {
+                    "name": "ai_foundry_simple",
+                    "summary": "AI Foundry Simple Format (Base64)",
+                    "value": {
+                      "data": "ZHllMSxkeWUyLFRpbWUsVGVtcCxMdmFsdWUKMSwyLDEwLDUwLDc1LjUKMiwzLDE1LDYwLDgwLjI=",
+                      "response_column": "Lvalue",
+                      "threshold": 1.5,
+                      "force_full_dataset": true
+                    }
+                  },
+                  {
+                    "name": "ai_foundry_multi_response",
+                    "summary": "AI Foundry Multi-Response Analysis",
+                    "value": {
+                      "data": "ZHllMSxkeWUyLFRpbWUsVGVtcCxMdmFsdWUsQXZhbHVlLEJ2YWx1ZQoxLDIsMTAsNTAsNzUuNSwxMi4zLDguNwoyLDMsMTUsNjAsODAuMiwxMy4xLDkuMg==",
+                      "response_column": "Lvalue,Avalue,Bvalue",
+                      "predictors": "dye1,dye2,Time,Temp",
+                      "threshold": 1.5,
+                      "force_full_dataset": true
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "response_variables": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "List of response variables analyzed"
+                        },
+                        "threshold": {
+                          "type": "number",
+                          "description": "LogWorth threshold used"
+                        },
+                        "force_full_dataset": {
+                          "type": "boolean",
+                          "description": "Whether full dataset was used"
+                        },
+                        "analysis_completed": {
+                          "type": "boolean",
+                          "description": "Analysis completion status"
+                        }
+                      }
+                    },
+                    "input_file": {
+                      "type": "string",
+                      "description": "Path to temporary input file"
+                    },
+                    "output_dir": {
+                      "type": "string",
+                      "description": "Directory containing analysis results"
+                    },
+                    "files": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of generated output files"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "examples": [
+                        "Invalid base64 data format",
+                        "URL data input not supported yet. Please use base64 encoded data."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "DOE analysis failed: [error details]"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["AI Foundry DOE Analysis"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DoeAnalysisRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "description": "CSV data as base64 encoded string or raw CSV"
+          },
+          "response_column": {
+            "type": "string",
+            "description": "Comma-separated response variable names (STRING format required for AI Foundry)"
+          },
+          "predictors": {
+            "type": "string",
+            "description": "Optional comma-separated predictor variable names"
+          },
+          "threshold": {
+            "type": "number",
+            "default": 1.5
+          },
+          "force_full_dataset": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": ["data", "response_column"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "AI Foundry DOE Analysis",
+      "description": "Mixed Model DOE analysis optimized for AI Foundry integration. Key requirements: 1) response_column must be comma-separated STRING (not array), 2) Always include threshold parameter, 3) Use base64 for data input"
+    }
+  ]
+}
