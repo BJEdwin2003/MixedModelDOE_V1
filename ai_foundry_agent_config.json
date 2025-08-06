@@ -23,10 +23,10 @@
     },
     "body_template": {
       "data": "{base64_csv_data}",
-      "response_vars": "{DOE_RESPONSE_VARS}",
+      "response_column": "{DOE_RESPONSE_VARS}",
       "predictors": "{DOE_PREDICTORS}",
       "threshold": "{DOE_THRESHOLD}",
-      "min_significant": "{DOE_MIN_SIGNIFICANT}"
+      "force_full_dataset": true
     }
   },
   
